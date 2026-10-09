@@ -2,7 +2,7 @@ package com.example.placemarklab.models
 
 import java.util.concurrent.atomic.AtomicLong
 
-class PlacemarkMemStore {
+class PlacedMarkList {
     private val placemarks = ArrayList<PlacedMark>()
     private val lastId = AtomicLong(0L)
 
