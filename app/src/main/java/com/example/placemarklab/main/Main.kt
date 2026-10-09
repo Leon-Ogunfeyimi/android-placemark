@@ -1,9 +1,9 @@
 package com.example.placemarklab.main
 
-import com.example.placemarklab.models.PlacemarkMemStore
+import com.example.placemarklab.models.PlacedMarkList
 import com.example.placemarklab.models.PlacedMark
 
-val store = PlacemarkMemStore()
+val store = PlacedMarkList()
 
 fun main() {
     println("=== Placemark Console App (Lab 1) ===")
