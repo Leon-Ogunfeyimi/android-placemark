@@ -3,7 +3,7 @@ package com.example.placemarklab
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
-import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.placemarklab.models.PlacedMark
@@ -19,78 +19,35 @@ class AddEditActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_add_edit)
 
-        createUserInterface()
+        val formTitle = findViewById<TextView>(R.id.formTitle)
+        titleInput = findViewById(R.id.titleInput)
+        descriptionInput = findViewById(R.id.descriptionInput)
+        xInput = findViewById(R.id.xInput)
+        yInput = findViewById(R.id.yInput)
 
-        editingId = intent.getLongExtra("id", -1L)
+        val id = intent.getLongExtra("id", -1L)
+        if (id != -1L) {
+            editingId = id
+            formTitle.text = "Edit Mark"
+            loadMark(id)
+        }
 
-        if (editingId != -1L) {
-            loadExistingMark(editingId!!)
+        findViewById<Button>(R.id.saveButton).setOnClickListener {
+            saveMark()
+        }
+
+        findViewById<Button>(R.id.cancelButton).setOnClickListener {
+            finish()
         }
     }
 
-    private fun createUserInterface() {
-        val root = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(32, 320, 32, 32)
-        }
-
-        titleInput = EditText(this).apply {
-            hint = "Title"
-        }
-
-        descriptionInput = EditText(this).apply {
-            hint = "Description"
-        }
-
-        xInput = EditText(this).apply {
-            hint = "X coordinate"
-            inputType =
-                android.text.InputType.TYPE_CLASS_NUMBER or
-                        android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
-        }
-
-        yInput = EditText(this).apply {
-            hint = "Y coordinate"
-            inputType =
-                android.text.InputType.TYPE_CLASS_NUMBER or
-                        android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
-        }
-
-        val saveButton = Button(this).apply {
-            text = "Save"
-            setOnClickListener {
-                saveMark()
-            }
-        }
-
-        val cancelButton = Button(this).apply {
-            text = "Cancel"
-            setOnClickListener {
-                finish()
-            }
-        }
-
-        root.addView(titleInput)
-        root.addView(descriptionInput)
-        root.addView(xInput)
-        root.addView(yInput)
-        root.addView(saveButton)
-        root.addView(cancelButton)
-
-        setContentView(root)
-    }
-
-    private fun loadExistingMark(id: Long) {
+    private fun loadMark(id: Long) {
         val mark = AppData.placedMarks.findOne(id)
 
         if (mark == null) {
-            Toast.makeText(
-                this,
-                "Mark not found",
-                Toast.LENGTH_SHORT
-            ).show()
-
+            Toast.makeText(this, "Mark not found", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
@@ -104,27 +61,27 @@ class AddEditActivity : AppCompatActivity() {
     private fun saveMark() {
         val title = titleInput.text.toString().trim()
         val description = descriptionInput.text.toString().trim()
+        val x = xInput.text.toString().toDoubleOrNull()
+        val y = yInput.text.toString().toDoubleOrNull()
 
         if (title.isEmpty()) {
-            titleInput.error = "Title is required"
+            titleInput.error = "Enter a title"
             return
         }
-
-        val x = xInput.text.toString().toDoubleOrNull()
 
         if (x == null) {
             xInput.error = "Enter a valid number"
             return
         }
 
-        val y = yInput.text.toString().toDoubleOrNull()
-
         if (y == null) {
             yInput.error = "Enter a valid number"
             return
         }
 
-        if (editingId == null || editingId == -1L) {
+        val id = editingId
+
+        if (id == null) {
             val mark = PlacedMark(
                 title = title,
                 desc = description,
@@ -133,15 +90,10 @@ class AddEditActivity : AppCompatActivity() {
             )
 
             AppData.placedMarks.create(mark)
-
-            Toast.makeText(
-                this,
-                "Mark created",
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast.makeText(this, "Mark added", Toast.LENGTH_SHORT).show()
         } else {
             val mark = PlacedMark(
-                id = editingId!!,
+                id = id,
                 title = title,
                 desc = description,
                 x = x,
@@ -149,12 +101,7 @@ class AddEditActivity : AppCompatActivity() {
             )
 
             AppData.placedMarks.update(mark)
-
-            Toast.makeText(
-                this,
-                "Mark updated",
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast.makeText(this, "Mark updated", Toast.LENGTH_SHORT).show()
         }
 
         finish()
